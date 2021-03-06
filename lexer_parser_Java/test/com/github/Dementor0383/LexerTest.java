@@ -25,6 +25,10 @@ public class LexerTest {
         Lexer lexer = new Lexer(br);
         List<Token> tokens = lexer.scan();
         List<Token> actual = new ArrayList<>();
+        // CR: 1. i think it's enough to check types of tokens
+        // CR: 2. you can make it more readable using Arrays.asList, also take a look at Assert.assertThat and org.hamcrest.core.Is.is
+        // CR: 3. your test should be helpful for you, they should check different inputs that you might get and that might fail
+        // CR:    e.g. what will happen for empty input? what will happen if we have one valid tag? one tag with one attribute? and so on
         actual.add(new Token('<', 1, TokenType.OP_ANGLE_BRACE));
         actual.add(new Token("testsuite", 1, TokenType.TEST_SUITE));
         actual.add(new Token("name", 1, TokenType.WORD));

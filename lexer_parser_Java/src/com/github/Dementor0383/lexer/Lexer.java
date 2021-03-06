@@ -19,6 +19,7 @@ public class Lexer {
         int nLine = 1;
         boolean counter = false;
         while ((line = readLine()) != null) {
+            // CR: you should at least check that your line equals to expected "<? xml...?>"
             if (counter == false){
                 counter = true;
                 continue;
@@ -45,11 +46,17 @@ public class Lexer {
                     case '"' -> TokenType.QUOTATION_MARKS;
                     case '?' -> TokenType.QUESTION_MARKS;
                     case '/' -> TokenType.SLASH;
+                    // CR: why do you need custom token types for such chars if you don't use them later?
                     case '$' -> TokenType.DOLLAR;
                     case '=' -> TokenType.EQUAL;
                     default -> null;
                 };
 
+                /* CR: you don't accept lots of valid test reports, e.g.:
+                     <failure>|!.-=</failure>
+                     <testsuite name="|!.-="/>
+                    it happens because you don't allow many of valid chars in quotes and outside of tag.
+                */
                 if (tokenType == null) {
                     throw new IllegalStateException(String.format("Unexpected char '%s' at line %d", c, nLine));
                 }

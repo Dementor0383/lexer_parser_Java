@@ -29,6 +29,8 @@ public class Parser {
 
     private TestSection parseAngle(){
         TestSection partTest = null;
+        // CR: please use your peek and advance methods everywhere,
+        // CR: this way you won't get IndexOutOfBoundsException and always will get at least some kind of readable error text
         if (tokens.get(pos).tokenType() != TokenType.OP_ANGLE_BRACE){
             throw error (String.format("No open angle brace at line %d!", tokens.get(pos).line()));
         }
@@ -42,6 +44,19 @@ public class Parser {
             else if (peek().tokenType() == TokenType.TESTCASE){
                 pos++;
                 List<TestSection> testCases = new ArrayList<>();
+                /*
+                 * CR:
+                 *  because you don't use here recursion for some reason and just search for suites and cases in while loop
+                 *  your program has such bugs:
+                 *   <?xml version="1.0" encoding="UTF-8" ?>
+                 *   <testsuite tests="1" failures="0" name="OtherTest" time="0" errors="0" skipped="0">
+                 *   <testsuite tests="1" failures="0" name="OtherTest" time="0" errors="0" skipped="0">
+                 *     <testcase classname="OtherTest" name="testEquals" time="0"/>
+                 *   </testsuite>
+                 *   </testsuite>
+                 *  in this case your program only fails in printer where you cast to (TestList)
+                 *  such structure problems should be detected in a parser
+                 */
                 while (peek().tokenType() != TokenType.TEST_SUITE){
                     testCases.add(parseTestCaseSection());
                     Token token = update();
@@ -58,6 +73,7 @@ public class Parser {
                          pos++;
                         token = update();
                     }
+                    // CR: reformat file (ctrl+alt+shift+l in idea)
                     }
                 pos++;
                 if (tokens.get(pos).tokenType() != TokenType.CL_ANGLE_BRACE){
@@ -208,7 +224,11 @@ public class Parser {
         int errors = 0;
         int skipped = 0;
         while (peek().tokenType() != TokenType.EOL) {
+            // CR: some of your tokens have null as their value and in this case your program will fail with npe
+            // CR: if it's really needed, you can do "tests".equals(..)
+            // CR: `tests="1" tests="2"` should fail
             if (token.value().equals("tests")){
+                // CR: tests======"1" works, same problem with other checks
                 while (peek().tokenType() != TokenType.NUMBER) token = advance();
                 token = advance();
                 tests = Integer.parseInt(token.value());
@@ -250,6 +270,7 @@ public class Parser {
                 token = advance();
                 skipped = Integer.parseInt(token.value());
                 pos++;
+                // CR: attributes can appear in any order, maybe skipped is not the last one
                 if (peek().tokenType() != TokenType.CL_ANGLE_BRACE) {
                     throw error (String.format("No close angle brace at line %d!", token.line()));
                 }

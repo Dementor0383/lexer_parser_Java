@@ -19,6 +19,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/*
+CR:
+ you need parser test to determine if your model is initialized correctly after lexer and parser worked.
+ For example:
+    public void testSuiteTag() {
+        List<Token> tokens = createTokens("""
+                <testsuite tests="3" failures="1" name="SomeTest" time="0.008">
+                </testsuite>
+                """);
+        TestSuite testSuite = getTestSuite(tokens)
+        Assert.assertEquals(testSuite.name(), "SomeTest");
+        Assert.assertEquals(testSuite.nSuccess(), 3);
+        Assert.assertEquals(testSuite.nFailure(), 1);
+        Assert.assertEquals(testSuite.time(), "0.008");
+    }
+ here we check that for empty test suite fields are initialized correctly.
+ also you might need methods that check : what will happen for test suite with one test case?
+ what will happen for testsuite inside testsuite? what will happen for testsuite with testcase with failure inside? and so on
+ */
 public class ParserTest {
     private String rightLine = """
              <?xml version=\"1.0\" encoding=\"UTF-8\"?>
